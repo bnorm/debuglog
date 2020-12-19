@@ -1,5 +1,5 @@
-rootProject.name = "kotlin-ir-plugin-template"
+rootProject.name = "debuglog"
 
-include(":kotlin-ir-plugin-gradle")
-include(":kotlin-ir-plugin")
-include(":kotlin-ir-plugin-native")
+include(":debuglog-gradle")
+include(":debuglog-plugin")
+include(":debuglog-plugin-native")

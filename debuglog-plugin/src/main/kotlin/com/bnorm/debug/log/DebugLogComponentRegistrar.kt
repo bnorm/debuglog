@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bnorm.template
+package com.bnorm.debug.log
 
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
 
 @AutoService(ComponentRegistrar::class)
-class TemplateComponentRegistrar(
+class DebugLogComponentRegistrar(
   private val defaultString: String,
   private val defaultFile: String,
 ) : ComponentRegistrar {
@@ -41,10 +41,10 @@ class TemplateComponentRegistrar(
     configuration: CompilerConfiguration
   ) {
     val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-    val string = configuration.get(TemplateCommandLineProcessor.ARG_STRING, defaultString)
-    val file = configuration.get(TemplateCommandLineProcessor.ARG_FILE, defaultFile)
+    val string = configuration.get(DebugLogCommandLineProcessor.ARG_STRING, defaultString)
+    val file = configuration.get(DebugLogCommandLineProcessor.ARG_FILE, defaultFile)
 
-    IrGenerationExtension.registerExtension(project, TemplateIrGenerationExtension(messageCollector, string, file))
+    IrGenerationExtension.registerExtension(project, DebugLogIrGenerationExtension(messageCollector, string, file))
   }
 }
 

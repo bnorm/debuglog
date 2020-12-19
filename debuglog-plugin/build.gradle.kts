@@ -19,7 +19,7 @@ dependencies {
 
 buildConfig {
   packageName(group.toString())
-  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"$group.$name\"")
 }
 
 tasks.withType<KotlinCompile> {

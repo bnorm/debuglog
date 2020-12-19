@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bnorm.template
+package com.bnorm.debug.log
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -42,7 +42,7 @@ fun debug() = "Hello, World!"
 
 fun compile(
   sourceFiles: List<SourceFile>,
-  plugin: ComponentRegistrar = TemplateComponentRegistrar(),
+  plugin: ComponentRegistrar = DebugLogComponentRegistrar(),
 ): KotlinCompilation.Result {
   return KotlinCompilation().apply {
     sources = sourceFiles
@@ -54,7 +54,7 @@ fun compile(
 
 fun compile(
   sourceFile: SourceFile,
-  plugin: ComponentRegistrar = TemplateComponentRegistrar(),
+  plugin: ComponentRegistrar = DebugLogComponentRegistrar(),
 ): KotlinCompilation.Result {
   return compile(listOf(sourceFile), plugin)
 }

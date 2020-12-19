@@ -12,9 +12,9 @@ dependencies {
 }
 
 buildConfig {
-  val project = project(":kotlin-ir-plugin")
+  val project = project(":debuglog-plugin")
   packageName(project.group.toString())
-  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${project.group}.${project.name}\"")
   buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${project.group}\"")
   buildConfigField("String", "KOTLIN_PLUGIN_NAME", "\"${project.name}\"")
   buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${project.version}\"")
