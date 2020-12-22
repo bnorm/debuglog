@@ -61,7 +61,10 @@ publishing {
   repositories {
     if (hasProperty("sonatypeUsername") && hasProperty("sonatypePassword")) {
       maven {
-        setUrl(if ("SNAPSHOT" in version.toString()) "https://oss.sonatype.org/content/repositories/snapshots" else "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+        setUrl(
+          if ("SNAPSHOT" in version.toString()) "https://oss.sonatype.org/content/repositories/snapshots"
+          else "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+        )
         credentials {
           username = property("sonatypeUsername") as String
           password = property("sonatypePassword") as String

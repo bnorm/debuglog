@@ -47,13 +47,12 @@ class DebugLogGradlePlugin : KotlinCompilerPluginSupportPlugin {
   override fun applyToCompilation(
     kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
+    kotlinCompilation.dependencies {
+      implementation("${BuildConfig.ANNOTATION_LIBRARY_GROUP}:${BuildConfig.ANNOTATION_LIBRARY_NAME}:${BuildConfig.ANNOTATION_LIBRARY_VERSION}")
+    }
+
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(DebugLogGradleExtension::class.java)
-
-    project.dependencies.add(
-      kotlinCompilation.implementationConfigurationName,
-      "${BuildConfig.ANNOTATION_LIBRARY_GROUP}:${BuildConfig.ANNOTATION_LIBRARY_NAME}:${BuildConfig.ANNOTATION_LIBRARY_VERSION}"
-    )
 
     return project.provider {
       listOf(
