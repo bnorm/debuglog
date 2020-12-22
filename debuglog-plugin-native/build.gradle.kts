@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   kotlin("jvm")
   kotlin("kapt")
-  id("org.jetbrains.dokka")
+  id("kotlin-publish")
 }
 
 dependencies {
@@ -28,4 +28,13 @@ tasks.register<Sync>("syncSource") {
 
 tasks.withType<KotlinCompile> {
   kotlinOptions.jvmTarget = "1.8"
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("default") {
+      from(components["java"])
+      artifact(tasks.kotlinSourcesJar)
+    }
+  }
 }

@@ -4,6 +4,7 @@ plugins {
   id("java-gradle-plugin")
   kotlin("jvm")
   id("com.github.gmazzo.buildconfig")
+  id("com.gradle.plugin-publish")
 }
 
 dependencies {
@@ -25,6 +26,10 @@ buildConfig {
   buildConfigField("String", "ANNOTATION_LIBRARY_VERSION", "\"${annotationProject.version}\"")
 }
 
+tasks.withType<KotlinCompile> {
+  kotlinOptions.jvmTarget = "1.8"
+}
+
 gradlePlugin {
   plugins {
     create("debuglog") {
@@ -36,6 +41,8 @@ gradlePlugin {
   }
 }
 
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
+pluginBundle {
+  website = "https://github.com/bnorm/debuglog"
+  vcsUrl = "https://github.com/bnorm/debuglog.git"
+  tags = listOf("kotlin", "compiler-plugin")
 }

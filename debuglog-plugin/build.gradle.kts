@@ -5,6 +5,7 @@ plugins {
   kotlin("kapt")
   id("com.github.gmazzo.buildconfig")
   id("com.bnorm.power.kotlin-power-assert")
+  id("kotlin-publish")
 }
 
 dependencies {
@@ -36,5 +37,14 @@ tasks.test {
 tasks.compileTestKotlin {
   kotlinOptions {
     useIR = true
+  }
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("default") {
+      from(components["java"])
+      artifact(tasks.kotlinSourcesJar)
+    }
   }
 }
