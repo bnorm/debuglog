@@ -26,25 +26,22 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 
 @AutoService(ComponentRegistrar::class)
 class DebugLogComponentRegistrar(
-  private val defaultString: String,
-  private val defaultFile: String,
+  private val defaultEnabled: Boolean,
 ) : ComponentRegistrar {
 
   @Suppress("unused") // Used by service loader
   constructor() : this(
-    defaultString = "Hello, World!",
-    defaultFile = "file.txt"
+    defaultEnabled = true,
   )
 
   override fun registerProjectComponents(
     project: MockProject,
     configuration: CompilerConfiguration
   ) {
-    val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-    val string = configuration.get(DebugLogCommandLineProcessor.ARG_STRING, defaultString)
-    val file = configuration.get(DebugLogCommandLineProcessor.ARG_FILE, defaultFile)
-
-    IrGenerationExtension.registerExtension(project, DebugLogIrGenerationExtension(messageCollector, string, file))
+    val enabled = configuration.get(DebugLogCommandLineProcessor.ARG_ENABLED, defaultEnabled)
+    if (enabled) {
+      IrGenerationExtension.registerExtension(project, DebugLogIrGenerationExtension())
+    }
   }
 }
 

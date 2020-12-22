@@ -12,12 +12,28 @@ dependencies {
 }
 
 buildConfig {
-  val project = project(":debuglog-plugin")
-  packageName(project.group.toString())
-  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${project.group}.${project.name}\"")
-  buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${project.group}\"")
-  buildConfigField("String", "KOTLIN_PLUGIN_NAME", "\"${project.name}\"")
-  buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${project.version}\"")
+  val pluginProject = project(":debuglog-plugin")
+  packageName(pluginProject.group.toString())
+  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${pluginProject.group}.${pluginProject.name}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${pluginProject.group}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_NAME", "\"${pluginProject.name}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${pluginProject.version}\"")
+
+  val annotationProject = project(":debuglog-annotation")
+  buildConfigField("String", "ANNOTATION_LIBRARY_GROUP", "\"${annotationProject.group}\"")
+  buildConfigField("String", "ANNOTATION_LIBRARY_NAME", "\"${annotationProject.name}\"")
+  buildConfigField("String", "ANNOTATION_LIBRARY_VERSION", "\"${annotationProject.version}\"")
+}
+
+gradlePlugin {
+  plugins {
+    create("debuglog") {
+      id = "com.bnorm.debuglog"
+      displayName = "Kotlin Debug Log compiler plugin"
+      description = "Kotlin compiler plugin to add debug logging to functions"
+      implementationClass = "com.bnorm.debug.log.DebugLogGradlePlugin"
+    }
+  }
 }
 
 tasks.withType<KotlinCompile> {

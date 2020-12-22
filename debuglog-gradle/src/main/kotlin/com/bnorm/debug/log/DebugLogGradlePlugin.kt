@@ -49,10 +49,15 @@ class DebugLogGradlePlugin : KotlinCompilerPluginSupportPlugin {
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(DebugLogGradleExtension::class.java)
+
+    project.dependencies.add(
+      kotlinCompilation.compileOnlyConfigurationName,
+      "${BuildConfig.ANNOTATION_LIBRARY_GROUP}:${BuildConfig.ANNOTATION_LIBRARY_NAME}:${BuildConfig.ANNOTATION_LIBRARY_VERSION}"
+    )
+
     return project.provider {
       listOf(
-        SubpluginOption(key = "string", value = extension.stringProperty.get()),
-        SubpluginOption(key = "file", value = extension.fileProperty.get().asFile.path),
+        SubpluginOption(key = "enabled", value = extension.enabled.toString()),
       )
     }
   }

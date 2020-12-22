@@ -16,14 +16,16 @@
 
 package com.bnorm.debug.log
 
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
+import kotlin.test.Test
 
-open class DebugLogGradleExtension(objects: ObjectFactory) {
-  private val enabledProperty: Property<Boolean> = objects.property(Boolean::class.java)
-    .apply { convention(true) }
+class DebugLogTest {
+  @Test
+  fun testDebugLog() {
+    greet(name = "Integration")
+  }
 
-  var enabled: Boolean
-    get() = enabledProperty.get()
-    set(value) = enabledProperty.set(value)
+  @DebugLog
+  private fun greet(greeting: String = "Hello", name: String = "World"): String {
+    return "$greeting, $name!"
+  }
 }
