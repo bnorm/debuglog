@@ -51,7 +51,7 @@ class DebugLogGradlePlugin : KotlinCompilerPluginSupportPlugin {
     val extension = project.extensions.getByType(DebugLogGradleExtension::class.java)
 
     project.dependencies.add(
-      kotlinCompilation.compileOnlyConfigurationName,
+      kotlinCompilation.implementationConfigurationName,
       "${BuildConfig.ANNOTATION_LIBRARY_GROUP}:${BuildConfig.ANNOTATION_LIBRARY_NAME}:${BuildConfig.ANNOTATION_LIBRARY_VERSION}"
     )
 
