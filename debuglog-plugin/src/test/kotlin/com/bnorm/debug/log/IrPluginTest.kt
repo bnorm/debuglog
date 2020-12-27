@@ -56,7 +56,7 @@ fun doSomething() {
     val result = compile(sourceFile = main, DebugLogComponentRegistrar(true))
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
-    val out = invokeMain(result, "MainKt").trim().split("\n")
+    val out = invokeMain(result, "MainKt").trim().split(Regex("""[\r\n]+"""))
     assert(out.size == 8)
     assert(out[0] == "⇢ greet(greeting=Hello, name=World)")
     assert(out[1].matches("⇠ greet \\[\\d+(\\.\\d+)?ms] = Hello, World!".toRegex()))
@@ -73,7 +73,7 @@ fun doSomething() {
     val result = compile(sourceFile = main, DebugLogComponentRegistrar(false))
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
-    val out = invokeMain(result, "MainKt").trim().split("\n")
+    val out = invokeMain(result, "MainKt").trim().split(Regex("""[\r\n]+"""))
     assertTrue(out.size == 2)
     assertTrue(out[0] == "Hello, World!")
     assertTrue(out[1] == "Hello, Kotlin IR!")
