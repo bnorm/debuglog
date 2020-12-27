@@ -104,7 +104,7 @@ fun invokeMain(result: KotlinCompilation.Result, className: String): String {
   val oldOut = System.out
   try {
     val buffer = ByteArrayOutputStream()
-    System.setOut(PrintStream(buffer))
+    System.setOut(PrintStream(buffer, false, "UTF-8"))
 
     try {
       val kClazz = result.classLoader.loadClass(className)
@@ -114,7 +114,7 @@ fun invokeMain(result: KotlinCompilation.Result, className: String): String {
       throw e.targetException
     }
 
-    return buffer.toString()
+    return buffer.toString("UTF-8")
   } finally {
     System.setOut(oldOut)
   }
