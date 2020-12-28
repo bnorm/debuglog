@@ -56,7 +56,7 @@ fun doSomething() {
     val result = compile(sourceFile = main, DebugLogComponentRegistrar(true))
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
-    val out = invokeMain(result, "MainKt").trim().split("\n")
+    val out = invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex())
     assert(out.size == 8)
     assert(out[0] == "⇢ greet(greeting=Hello, name=World)")
     assert(out[1].matches("⇠ greet \\[\\d+(\\.\\d+)?ms] = Hello, World!".toRegex()))
@@ -73,7 +73,7 @@ fun doSomething() {
     val result = compile(sourceFile = main, DebugLogComponentRegistrar(false))
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
-    val out = invokeMain(result, "MainKt").trim().split("\n")
+    val out = invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex())
     assertTrue(out.size == 2)
     assertTrue(out[0] == "Hello, World!")
     assertTrue(out[1] == "Hello, Kotlin IR!")
@@ -104,7 +104,7 @@ fun invokeMain(result: KotlinCompilation.Result, className: String): String {
   val oldOut = System.out
   try {
     val buffer = ByteArrayOutputStream()
-    System.setOut(PrintStream(buffer))
+    System.setOut(PrintStream(buffer, false, "UTF-8"))
 
     try {
       val kClazz = result.classLoader.loadClass(className)
@@ -114,7 +114,7 @@ fun invokeMain(result: KotlinCompilation.Result, className: String): String {
       throw e.targetException
     }
 
-    return buffer.toString()
+    return buffer.toString("UTF-8")
   } finally {
     System.setOut(oldOut)
   }
