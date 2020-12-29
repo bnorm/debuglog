@@ -19,6 +19,7 @@ dependencies {
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
   testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
   testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.2.6")
+  testImplementation("org.bitbucket.mstrobel:procyon-compilertools:0.5.36")
 }
 
 buildConfig {
