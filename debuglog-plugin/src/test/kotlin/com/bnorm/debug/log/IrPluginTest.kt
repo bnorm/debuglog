@@ -25,8 +25,8 @@ import com.strobel.decompiler.PlainTextOutput
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.jetbrains.kotlin.utils.indexOfFirst
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -64,7 +64,7 @@ fun doSomething() {
   @Test
   fun `IR plugin enabled`() {
     testIrPlugin(
-      isEnabled = true,
+      isPluginEnabled = true,
       expectedGreetMethod = """
         public static final String greet(@NotNull final String greeting, @NotNull final String name) {
             Intrinsics.checkNotNullParameter((Object)greeting, "greeting");
@@ -120,7 +120,7 @@ fun doSomething() {
   @Test
   fun `IR plugin disabled`() {
     testIrPlugin(
-      isEnabled = false,
+      isPluginEnabled = false,
       expectedGreetMethod = """
         public static final String greet(@NotNull final String greeting, @NotNull final String name) {
             Intrinsics.checkNotNullParameter((Object)greeting, "greeting");
@@ -148,43 +148,61 @@ fun doSomething() {
   }
 
   private fun testIrPlugin(
-    isEnabled: Boolean,
+    isPluginEnabled: Boolean,
     expectedGreetMethod: String,
     expectedDoSomethingMethod: String,
     outputVerifyFunc: (List<String>) -> Unit
   ) {
-    val result = compile(sourceFile = main, DebugLogComponentRegistrar(isEnabled))
+    val result = compile(sourceFile = main, DebugLogComponentRegistrar(isPluginEnabled))
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
-    val mainJavaCode = result.javaCode("MainKt")
-    assertEquals(expectedGreetMethod, methodGetter(mainJavaCode, "public static final String greet"))
-    assertEquals(expectedDoSomethingMethod, methodGetter(mainJavaCode, "public static final void doSomething"))
+    result.javaCode("MainKt").also { javaCode ->
+      assertMethod(expectedGreetMethod, javaCode, "public static final String greet")
+      assertMethod(expectedDoSomethingMethod, javaCode, "public static final void doSomething")
+    }
 
     outputVerifyFunc(invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex()))
   }
 
-  private fun methodGetter(classText: String, methodPrefix: String): String {
-    val lines = classText.split("\n")
-    val firstLineIndex = lines.indexOfFirst { it.contains(methodPrefix) }
-    val indentationCount = lines[firstLineIndex].takeWhile { it == ' ' }.length
+  private fun assertMethod(expectedMethod: String, javaCode: String, actualMethod: String) {
+    assertEquals(expectedMethod, fetchMethodByPrefix(javaCode, actualMethod))
+  }
 
-    var curleyBraceCount = 1
-    var currentIndex: Int = firstLineIndex + 1
+  private fun fetchMethodByPrefix(classText: String, methodSignaturePrefix: String): String {
+    val classLines = classText.split("\n")
+    val methodSignaturePredicate: (String) -> Boolean = { line -> line.contains(methodSignaturePrefix) }
+    val methodFirstLineIndex = classLines.indexOfFirst(methodSignaturePredicate)
 
-    while (curleyBraceCount != 0 && currentIndex < lines.lastIndex) {
-      if (lines[currentIndex].contains("{")) {
-        curleyBraceCount++
-      }
-      if (lines[currentIndex].contains("}")) {
-        curleyBraceCount--
-      }
-
-      currentIndex++
+    check(methodFirstLineIndex != -1) {
+      "Method with prefix '$methodSignaturePrefix' not found within class:\n$classText"
     }
 
-    return lines
-      .subList(firstLineIndex, currentIndex)
-      .joinToString("\n") { it.substring(indentationCount) }
+    val multiplePrefixMatches = classLines
+      .indexOfFirst(methodFirstLineIndex + 1, methodSignaturePredicate)
+      .let { index -> index != -1 }
+
+    check(!multiplePrefixMatches) {
+      "Multiple methods with prefix '$methodSignaturePrefix' found within class:\n$classText"
+    }
+
+    val indentationSize = classLines[methodFirstLineIndex].takeWhile { it == ' ' }.length
+
+    var curleyBraceCount = 1
+    var currentLineIndex: Int = methodFirstLineIndex + 1
+
+    while (curleyBraceCount != 0 && currentLineIndex < classLines.lastIndex) {
+      if (classLines[currentLineIndex].contains("{")) {
+        curleyBraceCount++
+      }
+      if (classLines[currentLineIndex].contains("}")) {
+        curleyBraceCount--
+      }
+      currentLineIndex++
+    }
+
+    return classLines
+      .subList(methodFirstLineIndex, currentLineIndex)
+      .joinToString("\n") { it.substring(indentationSize) }
   }
 }
 
@@ -232,7 +250,7 @@ fun KotlinCompilation.Result.javaCode(className: String): String {
   val decompilerSettings = DecompilerSettings.javaDefaults().apply {
     typeLoader = CompositeTypeLoader(*(mutableListOf<ITypeLoader>()
       .apply {
-        // Add every class to the type loaders to ensure it's everything gets loaded correctly.
+        // Ensure every class is available.
         generatedFiles.forEach {
           add(ArrayTypeLoader(it.readBytes()))
         }
