@@ -16,7 +16,9 @@
 
 package com.bnorm.debug.log
 
+import com.strobel.assembler.InputTypeLoader
 import com.strobel.assembler.metadata.ArrayTypeLoader
+import com.strobel.assembler.metadata.ClasspathTypeLoader
 import com.strobel.assembler.metadata.CompositeTypeLoader
 import com.strobel.assembler.metadata.ITypeLoader
 import com.strobel.decompiler.Decompiler
@@ -67,22 +69,22 @@ fun doSomething() {
       isPluginEnabled = true,
       expectedGreetMethod = """
         public static final String greet(@NotNull final String greeting, @NotNull final String name) {
-            Intrinsics.checkNotNullParameter((Object)greeting, "greeting");
-            Intrinsics.checkNotNullParameter((Object)name, "name");
+            Intrinsics.checkNotNullParameter(greeting, "greeting");
+            Intrinsics.checkNotNullParameter(name, "name");
             System.out.println((Object)("⇢ greet(greeting=" + greeting + ", name=" + name + ')'));
-            final TimeMark markNow = TimeSource${'$'}Monotonic.INSTANCE.markNow();
+            final TimeMark markNow = TimeSource.Monotonic.INSTANCE.markNow();
             try {
-                if (!Intrinsics.areEqual((Object)greeting, "Hello")) {
-                    System.out.println((Object)new StringBuilder().append("⇠ greet [").append((Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc())).append("] = ").append("Early return").toString());
+                if (!Intrinsics.areEqual(greeting, "Hello")) {
+                    System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + "Early return"));
                     return "Early return";
                 }
                 Thread.sleep(15L);
                 final String string = greeting + ", " + name + '!';
-                System.out.println((Object)new StringBuilder().append("⇠ greet [").append((Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc())).append("] = ").append(string).toString());
+                System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + string));
                 return string;
             }
             catch (Throwable t) {
-                System.out.println((Object)new StringBuilder().append("⇠ greet [").append((Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc())).append("] = ").append((Object)t).toString());
+                System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
                 throw t;
             }
         }
@@ -90,14 +92,14 @@ fun doSomething() {
 
       expectedDoSomethingMethod = """
         public static final void doSomething() {
-            System.out.println("⇢ doSomething()");
-            final TimeMark markNow = TimeSource${'$'}Monotonic.INSTANCE.markNow();
+            System.out.println((Object)"⇢ doSomething()");
+            final TimeMark markNow = TimeSource.Monotonic.INSTANCE.markNow();
             try {
                 Thread.sleep(15L);
-                System.out.println((Object)new StringBuilder().append("⇠ doSomething [").append((Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc())).append(']').toString());
+                System.out.println((Object)("⇠ doSomething [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + ']'));
             }
             catch (Throwable t) {
-                System.out.println((Object)new StringBuilder().append("⇠ doSomething [").append((Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc())).append("] = ").append((Object)t).toString());
+                System.out.println((Object)("⇠ doSomething [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
                 throw t;
             }
         }
@@ -123,9 +125,9 @@ fun doSomething() {
       isPluginEnabled = false,
       expectedGreetMethod = """
         public static final String greet(@NotNull final String greeting, @NotNull final String name) {
-            Intrinsics.checkNotNullParameter((Object)greeting, "greeting");
-            Intrinsics.checkNotNullParameter((Object)name, "name");
-            if (!Intrinsics.areEqual((Object)greeting, "Hello")) {
+            Intrinsics.checkNotNullParameter(greeting, "greeting");
+            Intrinsics.checkNotNullParameter(name, "name");
+            if (!Intrinsics.areEqual(greeting, "Hello")) {
                 return "Early return";
             }
             Thread.sleep(15L);
@@ -254,6 +256,9 @@ fun KotlinCompilation.Result.javaCode(className: String): String {
         generatedFiles.forEach {
           add(ArrayTypeLoader(it.readBytes()))
         }
+
+        // Loads any standard classes already on the classpath.
+        add(InputTypeLoader())
       }
       .toTypedArray()))
 
