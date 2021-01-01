@@ -18,7 +18,6 @@ package com.bnorm.debug.log
 
 import com.strobel.assembler.InputTypeLoader
 import com.strobel.assembler.metadata.ArrayTypeLoader
-import com.strobel.assembler.metadata.ClasspathTypeLoader
 import com.strobel.assembler.metadata.CompositeTypeLoader
 import com.strobel.assembler.metadata.ITypeLoader
 import com.strobel.decompiler.Decompiler
@@ -143,8 +142,8 @@ fun doSomething() {
 
       outputVerifyFunc = { out ->
         assertTrue(out.size == 2)
-        assertEquals("Hello, World!", out[0])
-        assertEquals("Hello, Kotlin IR!", out[1])
+        assertTrue(out[0] == "Hello, World!")
+        assertTrue(out[1] == "Hello, Kotlin IR!")
       }
     )
   }
