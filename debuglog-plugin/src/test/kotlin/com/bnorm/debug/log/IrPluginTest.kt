@@ -48,9 +48,6 @@ fun main() {
 
 @DebugLog
 fun greet(greeting: String = "Hello", name: String = "World"): String {
-    if (greeting != "Hello") {
-        return "Early return"
-    }
     Thread.sleep(15)
     return "${'$'}greeting, ${'$'}name!"
 }
@@ -58,6 +55,39 @@ fun greet(greeting: String = "Hello", name: String = "World"): String {
 @DebugLog
 fun doSomething() {
     Thread.sleep(15)
+}
+"""
+  )
+
+  private val earlyReturn = SourceFile.kotlin(
+    "earlyReturn.kt", """
+import com.bnorm.debug.log.DebugLog
+
+@DebugLog
+fun earlyReturn(input: String): String {
+    if (input == "EARLY_RETURN_1") {
+        return "Early return - 1"
+    }
+    if (input == "EARLY_RETURN_2") {
+        return "Early return - 2"
+    }
+    return "Normal return"
+}
+"""
+  )
+
+  private val earlyExit = SourceFile.kotlin(
+    "earlyExit.kt", """
+import com.bnorm.debug.log.DebugLog
+
+@DebugLog
+fun earlyExit(input: String) {
+    if (input == "EARLY_RETURN_1") {
+        return
+    }
+    if (input == "EARLY_RETURN_2") {
+        return
+    }
 }
 """
   )
@@ -77,10 +107,6 @@ fun doSomething() {
           System.out.println((Object)("⇢ greet(greeting=" + greeting + ", name=" + name + ')'));
           final TimeMark markNow = TimeSource.Monotonic.INSTANCE.markNow();
           try {
-              if (!Intrinsics.areEqual(greeting, "Hello")) {
-                  System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + "Early return"));
-                  return "Early return";
-              }
               Thread.sleep(15L);
               final String string = greeting + ", " + name + '!';
               System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + string));
@@ -133,9 +159,6 @@ fun doSomething() {
       public static final String greet(@NotNull final String greeting, @NotNull final String name) {
           Intrinsics.checkNotNullParameter(greeting, "greeting");
           Intrinsics.checkNotNullParameter(name, "name");
-          if (!Intrinsics.areEqual(greeting, "Hello")) {
-              return "Early return";
-          }
           Thread.sleep(15L);
           return greeting + ", " + name + '!';
       }
@@ -152,6 +175,67 @@ fun doSomething() {
     assertTrue(out.size == 2)
     assertTrue(out[0] == "Hello, World!")
     assertTrue(out[1] == "Hello, Kotlin IR!")
+  }
+
+  @Test
+  fun `IR plugin enabled - with early return`() {
+    val result = compile(sourceFile = earlyReturn, DebugLogComponentRegistrar(true))
+    assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+    assertFunction(result.javaCode("EarlyReturnKt"), "public static final String earlyReturn",
+      """
+      public static final String earlyReturn(@NotNull final String input) {
+          Intrinsics.checkNotNullParameter(input, "input");
+          System.out.println((Object)("⇢ earlyReturn(input=" + input + ')'));
+          final TimeMark markNow = TimeSource.Monotonic.INSTANCE.markNow();
+          try {
+              if (Intrinsics.areEqual(input, "EARLY_RETURN_1")) {
+                  System.out.println((Object)("⇠ earlyReturn [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + "Early return - 1"));
+                  return "Early return - 1";
+              }
+              if (Intrinsics.areEqual(input, "EARLY_RETURN_2")) {
+                  System.out.println((Object)("⇠ earlyReturn [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + "Early return - 2"));
+                  return "Early return - 2";
+              }
+              System.out.println((Object)("⇠ earlyReturn [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + "Normal return"));
+              return "Normal return";
+          }
+          catch (Throwable t) {
+              System.out.println((Object)("⇠ earlyReturn [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
+              throw t;
+          }
+      }
+      """.trimIndent())
+  }
+
+  @Test
+  fun `IR plugin enabled - with early exit`() {
+    val result = compile(sourceFile = earlyExit, DebugLogComponentRegistrar(true))
+    assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+    assertFunction(result.javaCode("EarlyExitKt"), "public static final void earlyExit",
+      """
+      public static final void earlyExit(@NotNull final String input) {
+          Intrinsics.checkNotNullParameter(input, "input");
+          System.out.println((Object)("⇢ earlyExit(input=" + input + ')'));
+          final TimeMark markNow = TimeSource.Monotonic.INSTANCE.markNow();
+          try {
+              if (Intrinsics.areEqual(input, "EARLY_RETURN_1")) {
+                  System.out.println((Object)("⇠ earlyExit [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + ']'));
+                  return;
+              }
+              if (Intrinsics.areEqual(input, "EARLY_RETURN_2")) {
+                  System.out.println((Object)("⇠ earlyExit [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + ']'));
+                  return;
+              }
+              System.out.println((Object)("⇠ earlyExit [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + ']'));
+          }
+          catch (Throwable t) {
+              System.out.println((Object)("⇠ earlyExit [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
+              throw t;
+          }
+      }
+      """.trimIndent())
   }
 
   private fun assertFunction(javaCode: String, functionStatement: String, expectedFunction: String) {
