@@ -25,13 +25,13 @@ import com.strobel.decompiler.DecompilerSettings
 import com.strobel.decompiler.PlainTextOutput
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
-import org.jetbrains.kotlin.utils.indexOfFirst
-import org.junit.jupiter.api.Assertions
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.io.StringWriter
 import java.lang.reflect.InvocationTargetException
+import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.utils.indexOfFirst
+import org.junit.jupiter.api.Assertions
 
 fun assertFunction(javaCode: String, functionStatement: String, expectedFunction: String) {
   Assertions.assertEquals(expectedFunction, fetchMethodByPrefix(javaCode, functionStatement))
@@ -76,7 +76,7 @@ fun fetchMethodByPrefix(classText: String, methodSignaturePrefix: String): Strin
 
 fun compile(
   sourceFiles: List<SourceFile>,
-  plugin: ComponentRegistrar,
+  plugin: ComponentRegistrar
 ): KotlinCompilation.Result {
   return KotlinCompilation().apply {
     sources = sourceFiles
@@ -89,7 +89,7 @@ fun compile(
 
 fun compile(
   sourceFile: SourceFile,
-  plugin: ComponentRegistrar,
+  plugin: ComponentRegistrar
 ): KotlinCompilation.Result {
   return compile(listOf(sourceFile), plugin)
 }
@@ -140,4 +140,3 @@ fun KotlinCompilation.Result.javaCode(className: String): String {
     writer.toString().trimEnd().trimIndent()
   }
 }
-
