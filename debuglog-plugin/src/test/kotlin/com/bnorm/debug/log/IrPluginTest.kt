@@ -158,15 +158,15 @@ fun doSomething() {
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
     result.javaCode("MainKt").also { javaCode ->
-      assertMethod(expectedGreetMethod, javaCode, "public static final String greet")
-      assertMethod(expectedDoSomethingMethod, javaCode, "public static final void doSomething")
+      assertFunction(javaCode, "public static final String greet", expectedGreetMethod)
+      assertFunction(javaCode, "public static final void doSomething", expectedDoSomethingMethod)
     }
 
     outputVerifyFunc(invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex()))
   }
 
-  private fun assertMethod(expectedMethod: String, javaCode: String, actualMethod: String) {
-    assertEquals(expectedMethod, fetchMethodByPrefix(javaCode, actualMethod))
+  private fun assertFunction(javaCode: String, functionStatement: String, expectedFunction: String) {
+    assertEquals(expectedFunction, fetchMethodByPrefix(javaCode, functionStatement))
   }
 
   private fun fetchMethodByPrefix(classText: String, methodSignaturePrefix: String): String {
