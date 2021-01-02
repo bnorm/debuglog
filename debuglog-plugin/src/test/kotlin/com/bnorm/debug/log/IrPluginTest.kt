@@ -18,13 +18,9 @@ package com.bnorm.debug.log
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
-import java.lang.reflect.InvocationTargetException
 
 class IrPluginTest {
 
@@ -56,6 +52,44 @@ fun doSomething() {
     val result = compile(sourceFile = main, DebugLogComponentRegistrar(true))
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
+    val javaCode = result.javaCode("MainKt")
+
+    assertFunction(javaCode, "public static final String greet",
+      """
+      public static final String greet(@NotNull final String greeting, @NotNull final String name) {
+          Intrinsics.checkNotNullParameter(greeting, "greeting");
+          Intrinsics.checkNotNullParameter(name, "name");
+          System.out.println((Object)("⇢ greet(greeting=" + greeting + ", name=" + name + ')'));
+          final TimeMark markNow = TimeSource.Monotonic.INSTANCE.markNow();
+          try {
+              Thread.sleep(15L);
+              final String string = greeting + ", " + name + '!';
+              System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + string));
+              return string;
+          }
+          catch (Throwable t) {
+              System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
+              throw t;
+          }
+      }
+      """.trimIndent())
+
+    assertFunction(javaCode, "public static final void doSomething",
+      """
+      public static final void doSomething() {
+          System.out.println((Object)"⇢ doSomething()");
+          final TimeMark markNow = TimeSource.Monotonic.INSTANCE.markNow();
+          try {
+              Thread.sleep(15L);
+              System.out.println((Object)("⇠ doSomething [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + ']'));
+          }
+          catch (Throwable t) {
+              System.out.println((Object)("⇠ doSomething [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
+              throw t;
+          }
+      }
+      """.trimIndent())
+
     val out = invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex())
     assert(out.size == 8)
     assert(out[0] == "⇢ greet(greeting=Hello, name=World)")
@@ -73,49 +107,28 @@ fun doSomething() {
     val result = compile(sourceFile = main, DebugLogComponentRegistrar(false))
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
+    val javaCode = result.javaCode("MainKt")
+
+    assertFunction(javaCode, "public static final String greet",
+      """
+      public static final String greet(@NotNull final String greeting, @NotNull final String name) {
+          Intrinsics.checkNotNullParameter(greeting, "greeting");
+          Intrinsics.checkNotNullParameter(name, "name");
+          Thread.sleep(15L);
+          return greeting + ", " + name + '!';
+      }
+      """.trimIndent())
+
+    assertFunction(javaCode, "public static final void doSomething",
+      """
+      public static final void doSomething() {
+          Thread.sleep(15L);
+      }
+      """.trimIndent())
+
     val out = invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex())
     assertTrue(out.size == 2)
     assertTrue(out[0] == "Hello, World!")
     assertTrue(out[1] == "Hello, Kotlin IR!")
-  }
-}
-
-fun compile(
-  sourceFiles: List<SourceFile>,
-  plugin: ComponentRegistrar,
-): KotlinCompilation.Result {
-  return KotlinCompilation().apply {
-    sources = sourceFiles
-    useIR = true
-    compilerPlugins = listOf(plugin)
-    inheritClassPath = true
-    verbose = false
-  }.compile()
-}
-
-fun compile(
-  sourceFile: SourceFile,
-  plugin: ComponentRegistrar,
-): KotlinCompilation.Result {
-  return compile(listOf(sourceFile), plugin)
-}
-
-fun invokeMain(result: KotlinCompilation.Result, className: String): String {
-  val oldOut = System.out
-  try {
-    val buffer = ByteArrayOutputStream()
-    System.setOut(PrintStream(buffer, false, "UTF-8"))
-
-    try {
-      val kClazz = result.classLoader.loadClass(className)
-      val main = kClazz.declaredMethods.single { it.name == "main" && it.parameterCount == 0 }
-      main.invoke(null)
-    } catch (e: InvocationTargetException) {
-      throw e.targetException
-    }
-
-    return buffer.toString("UTF-8")
-  } finally {
-    System.setOut(oldOut)
   }
 }

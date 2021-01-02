@@ -99,10 +99,15 @@ class DebugLogTransformer(
       if (expression.returnTargetSymbol != function.symbol) return super.visitReturn(expression)
 
       return DeclarationIrBuilder(pluginContext, function.symbol).irBlock {
-        val result = irTemporary(expression.value)
-        +irDebugExit(function, startTime, irGet(result))
-        +expression.apply {
-          value = irGet(result)
+        if (expression.value.type == typeUnit) {
+          +irDebugExit(function, startTime)
+          +expression
+        } else {
+          val result = irTemporary(expression.value)
+          +irDebugExit(function, startTime, irGet(result))
+          +expression.apply {
+            value = irGet(result)
+          }
         }
       }
     }
