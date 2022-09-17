@@ -79,7 +79,7 @@ fun earlyExit(input: String) {
               System.out.println((Object)("⇠ earlyReturn [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + "Normal return"));
               return "Normal return";
           }
-          catch (Throwable t) {
+          catch (final Throwable t) {
               System.out.println((Object)("⇠ earlyReturn [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
               throw t;
           }
@@ -109,7 +109,7 @@ fun earlyExit(input: String) {
               }
               System.out.println((Object)("⇠ earlyExit [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + ']'));
           }
-          catch (Throwable t) {
+          catch (final Throwable t) {
               System.out.println((Object)("⇠ earlyExit [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
               throw t;
           }

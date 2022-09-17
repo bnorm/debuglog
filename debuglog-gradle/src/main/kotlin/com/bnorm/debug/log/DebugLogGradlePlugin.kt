@@ -38,17 +38,11 @@ class DebugLogGradlePlugin : KotlinCompilerPluginSupportPlugin {
     version = BuildConfig.KOTLIN_PLUGIN_VERSION
   )
 
-  override fun getPluginArtifactForNative(): SubpluginArtifact = SubpluginArtifact(
-    groupId = BuildConfig.KOTLIN_PLUGIN_GROUP,
-    artifactId = BuildConfig.KOTLIN_PLUGIN_NAME + "-native",
-    version = BuildConfig.KOTLIN_PLUGIN_VERSION
-  )
-
   override fun applyToCompilation(
     kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
     kotlinCompilation.dependencies {
-      implementation("${BuildConfig.ANNOTATION_LIBRARY_GROUP}:${BuildConfig.ANNOTATION_LIBRARY_NAME}:${BuildConfig.ANNOTATION_LIBRARY_VERSION}")
+      compileOnly("${BuildConfig.ANNOTATION_LIBRARY_GROUP}:${BuildConfig.ANNOTATION_LIBRARY_NAME}:${BuildConfig.ANNOTATION_LIBRARY_VERSION}")
     }
 
     val project = kotlinCompilation.target.project

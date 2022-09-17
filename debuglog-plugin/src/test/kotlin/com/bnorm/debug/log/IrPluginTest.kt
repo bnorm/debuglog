@@ -19,7 +19,6 @@ package com.bnorm.debug.log
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class IrPluginTest {
@@ -67,7 +66,7 @@ fun doSomething() {
               System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + string));
               return string;
           }
-          catch (Throwable t) {
+          catch (final Throwable t) {
               System.out.println((Object)("⇠ greet [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
               throw t;
           }
@@ -83,7 +82,7 @@ fun doSomething() {
               Thread.sleep(15L);
               System.out.println((Object)("⇠ doSomething [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + ']'));
           }
-          catch (Throwable t) {
+          catch (final Throwable t) {
               System.out.println((Object)("⇠ doSomething [" + (Object)Duration.toString-impl(markNow.elapsedNow-UwyO8pc()) + "] = " + t));
               throw t;
           }
@@ -91,15 +90,17 @@ fun doSomething() {
       """.trimIndent())
 
     val out = invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex())
+    val iter = out.iterator()
     assert(out.size == 8)
-    assert(out[0] == "⇢ greet(greeting=Hello, name=World)")
-    assert(out[1].matches("⇠ greet \\[\\d+(\\.\\d+)?ms] = Hello, World!".toRegex()))
-    assert(out[2] == "Hello, World!")
-    assert(out[3] == "⇢ greet(greeting=Hello, name=Kotlin IR)")
-    assert(out[4].matches("⇠ greet \\[\\d+(\\.\\d+)?ms] = Hello, Kotlin IR!".toRegex()))
-    assert(out[5] == "Hello, Kotlin IR!")
-    assert(out[6] == "⇢ doSomething()")
-    assert(out[7].matches("⇠ doSomething \\[\\d+(\\.\\d+)?ms]".toRegex()))
+    assert(iter.next() == "⇢ greet(greeting=Hello, name=World)")
+    assert(iter.next() matches "⇠ greet \\[\\d+(\\.\\d+)?ms] = Hello, World!".toRegex())
+    assert(iter.next() == "Hello, World!")
+    assert(iter.next() == "⇢ greet(greeting=Hello, name=Kotlin IR)")
+    assert(iter.next() matches "⇠ greet \\[\\d+(\\.\\d+)?ms] = Hello, Kotlin IR!".toRegex())
+    assert(iter.next() == "Hello, Kotlin IR!")
+    assert(iter.next() == "⇢ doSomething()")
+    assert(iter.next() matches "⇠ doSomething \\[\\d+(\\.\\d+)?ms]".toRegex())
+    assert(!iter.hasNext())
   }
 
   @Test
@@ -127,8 +128,10 @@ fun doSomething() {
       """.trimIndent())
 
     val out = invokeMain(result, "MainKt").trim().split("""\r?\n+""".toRegex())
-    assertTrue(out.size == 2)
-    assertTrue(out[0] == "Hello, World!")
-    assertTrue(out[1] == "Hello, Kotlin IR!")
+    val iter = out.iterator()
+    assert(out.size == 2)
+    assert(iter.next() == "Hello, World!")
+    assert(iter.next() == "Hello, Kotlin IR!")
+    assert(!iter.hasNext())
   }
 }
