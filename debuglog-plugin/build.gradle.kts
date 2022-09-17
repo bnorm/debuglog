@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   kotlin("jvm")
   kotlin("kapt")
@@ -11,15 +9,15 @@ plugins {
 dependencies {
   compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
-  kapt("com.google.auto.service:auto-service:1.0-rc7")
-  compileOnly("com.google.auto.service:auto-service-annotations:1.0-rc7")
+  kapt("com.google.auto.service:auto-service:1.0.1")
+  compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
 
   testImplementation(project(":debuglog-annotation"))
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
   testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-  testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.2.6")
-  testImplementation("org.bitbucket.mstrobel:procyon-compilertools:0.5.36")
+  testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.9")
+  testImplementation("org.bitbucket.mstrobel:procyon-compilertools:0.6.0")
 }
 
 buildConfig {
@@ -27,18 +25,8 @@ buildConfig {
   buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"$group.$name\"")
 }
 
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
-}
-
 tasks.test {
   useJUnitPlatform()
-}
-
-tasks.compileTestKotlin {
-  kotlinOptions {
-    useIR = true
-  }
 }
 
 publishing {
